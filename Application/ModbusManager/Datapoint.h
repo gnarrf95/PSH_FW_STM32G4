@@ -17,9 +17,19 @@ extern "C" {
 
 
 
+typedef enum
+{
+	ACCESS_NONE = 0,
+	ACCESS_READONLY,
+	ACCESS_WRITEONLY,
+	ACCESS_READWRITE
+} ModbusManager_Datapoint_Access_e;
+
 typedef struct
 {
 	uint16_t startAddress;
+
+	ModbusManager_Datapoint_Access_e access;
 
 	uint8_t *pData;
 	uint8_t dataSizeBytes;
@@ -27,13 +37,14 @@ typedef struct
 
 typedef struct
 {
-	ModbusManager_Datapoint_t *pArray;
-	uint32_t arraySize;
+	const ModbusManager_Datapoint_t *pArray;
+	const uint32_t arraySize;
 } ModbusManager_DatapointArray_t;
 
 
 
-modbus_Exception_e ModbusManager_Datapoint_ReadRegister(ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress, uint16_t *pRegisterBuffer);
+modbus_Exception_e ModbusManager_Datapoint_ReadRegister(const ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress, uint16_t *pRegisterBuffer);
+modbus_Exception_e ModbusManager_Datapoint_WriteRegister(const ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress, uint16_t registerValue);
 
 
 

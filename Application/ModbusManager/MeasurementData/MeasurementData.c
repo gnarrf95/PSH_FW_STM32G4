@@ -12,30 +12,18 @@
 
 
 
-/*
- * Measurement Data Format:
- * timestamp 	u32		us		2R
- * vdda 		s32		uV		2R
- * voltage 		s32		uV		2R
- * current 		s32		uA		2R
- * power 		s32		uW		2R
- * tempFet 		s16		m°C		1R
- * tempMcu 		s16		m°C		1R
- * charge 		s64		uA*ms	4R
- * energy 		s64		uW*ms	4R
- */
+#define MODBUSMANAGER_MEASUREMENTDATA_TIMESTAMP					0x0000
+#define MODBUSMANAGER_MEASUREMENTDATA_VDDA						0x0002
+#define MODBUSMANAGER_MEASUREMENTDATA_VOLTAGE					0x0004
+#define MODBUSMANAGER_MEASUREMENTDATA_CURRENT					0x0006
+#define MODBUSMANAGER_MEASUREMENTDATA_POWER						0x0008
+#define MODBUSMANAGER_MEASUREMENTDATA_RESISTANCE				0x000A
+#define MODBUSMANAGER_MEASUREMENTDATA_TEMPFET					0x000C
+#define MODBUSMANAGER_MEASUREMENTDATA_TEMPMCU					0x000E
+#define MODBUSMANAGER_MEASUREMENTDATA_CHARGECOUNT				0x0010
+#define MODBUSMANAGER_MEASUREMENTDATA_ENERGYCOUNT				0x0014
 
-#define MODBUSMANAGER_HOLDINGREGISTER_TIMESTAMP			0x0000
-#define MODBUSMANAGER_HOLDINGREGISTER_VDDA				0x0002
-#define MODBUSMANAGER_HOLDINGREGISTER_VOLTAGE			0x0004
-#define MODBUSMANAGER_HOLDINGREGISTER_CURRENT			0x0006
-#define MODBUSMANAGER_HOLDINGREGISTER_POWER				0x0008
-#define MODBUSMANAGER_HOLDINGREGISTER_TEMPFET			0x000A
-#define MODBUSMANAGER_HOLDINGREGISTER_TEMPMCU			0x000B
-#define MODBUSMANAGER_HOLDINGREGISTER_CHARGECOUNT		0x000C
-#define MODBUSMANAGER_HOLDINGREGISTER_ENERGYCOUNT		0x0010
-
-#define MODBUSMANAGER_DOUBLEBUFFER_TRIGGER				MODBUSMANAGER_HOLDINGREGISTER_TIMESTAMP
+#define MODBUSMANAGER_MEASUREMENTDATA_DOUBLEBUFFER_TRIGGER		MODBUSMANAGER_MEASUREMENTDATA_TIMESTAMP
 
 static struct
 {
@@ -44,65 +32,81 @@ static struct
 	int32_t voltage;
 	int32_t current;
 	int32_t power;
+	uint32_t resistance;
 	int16_t tempFet;
 	int16_t tempMcu;
 	int64_t charge;
 	int64_t energy;
-} gDoubleBuffer;
+} gMeasurementData_DoubleBuffer;
 
-static const ModbusManager_Datapoint_t DATAPOINTS[] =
+static const ModbusManager_Datapoint_t gDatapoints[] =
 {
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_TIMESTAMP,
-		.pData = (uint8_t *)&gDoubleBuffer.timestamp,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_TIMESTAMP,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.timestamp,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_VDDA,
-		.pData = (uint8_t *)&gDoubleBuffer.vdda,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_VDDA,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.vdda,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_VOLTAGE,
-		.pData = (uint8_t *)&gDoubleBuffer.voltage,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_VOLTAGE,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.voltage,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_CURRENT,
-		.pData = (uint8_t *)&gDoubleBuffer.current,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_CURRENT,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.current,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_POWER,
-		.pData = (uint8_t *)&gDoubleBuffer.power,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_POWER,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.power,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_TEMPFET,
-		.pData = (uint8_t *)&gDoubleBuffer.tempFet,
-		.dataSizeBytes = 2
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_RESISTANCE,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.resistance,
+		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_TEMPMCU,
-		.pData = (uint8_t *)&gDoubleBuffer.tempMcu,
-		.dataSizeBytes = 2
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_TEMPFET,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.tempFet,
+		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_CHARGECOUNT,
-		.pData = (uint8_t *)&gDoubleBuffer.charge,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_TEMPMCU,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.tempMcu,
+		.dataSizeBytes = 4
+	},
+	{
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_CHARGECOUNT,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.charge,
 		.dataSizeBytes = 8
 	},
 	{
-		.startAddress = MODBUSMANAGER_HOLDINGREGISTER_ENERGYCOUNT,
-		.pData = (uint8_t *)&gDoubleBuffer.energy,
+		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_ENERGYCOUNT,
+		.access = ACCESS_READONLY,
+		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.energy,
 		.dataSizeBytes = 8
 	}
 };
 
-static const ModbusManager_DatapointArray_t gModbusManager_MeasurementData_Array =
+static const ModbusManager_DatapointArray_t gDatapointArray =
 {
-	.pArray = DATAPOINTS,
-	.arraySize = sizeof(DATAPOINTS) / sizeof(ModbusManager_Datapoint_t)
+	.pArray = gDatapoints,
+	.arraySize = sizeof(gDatapoints) / sizeof(ModbusManager_Datapoint_t)
 };
 
 
@@ -113,14 +117,14 @@ static void ModbusManager_MeasurementData_FetchDoubleBuffer(void);
 
 //------------------------------------------------------------------------------
 //
-modbus_Exception_e ModbusManager_MeasurementData_ReadHoldingRegisters(modbus_FunctionCode_e /* functionCode */, uint16_t registerAddress, uint16_t *pRegisterBuffer)
+modbus_Exception_e ModbusManager_MeasurementData_ReadInputRegisters(modbus_FunctionCode_e /* functionCode */, uint16_t registerAddress, uint16_t *pRegisterBuffer)
 {
-	if (registerAddress == MODBUSMANAGER_DOUBLEBUFFER_TRIGGER)
+	if (registerAddress == MODBUSMANAGER_MEASUREMENTDATA_DOUBLEBUFFER_TRIGGER)
 	{
 		ModbusManager_MeasurementData_FetchDoubleBuffer();
 	}
 
-	return ModbusManager_Datapoint_ReadRegister(&gModbusManager_MeasurementData_Array, registerAddress, pRegisterBuffer);
+	return ModbusManager_Datapoint_ReadRegister(&gDatapointArray, registerAddress, pRegisterBuffer);
 }
 
 
@@ -129,19 +133,20 @@ modbus_Exception_e ModbusManager_MeasurementData_ReadHoldingRegisters(modbus_Fun
 //
 static void ModbusManager_MeasurementData_FetchDoubleBuffer(void)
 {
-	gDoubleBuffer.timestamp = TimerMicro_GetTimestamp();
+	gMeasurementData_DoubleBuffer.timestamp = TimerMicro_GetTimestamp();
 
 	AdcHandler_Data_t adcDataBuffer;
 	AdcHandler_GetData(&adcDataBuffer);
 
-	gDoubleBuffer.vdda = (int32_t)(adcDataBuffer.vdda * 1000000.0);
-	gDoubleBuffer.voltage = (int32_t)(adcDataBuffer.voltage * 1000000.0);
-	gDoubleBuffer.current = (int32_t)(adcDataBuffer.current * 1000000.0);
-	gDoubleBuffer.power = (int32_t)(adcDataBuffer.powerPrecise * 1000000.0);
-	gDoubleBuffer.tempFet = (int16_t)(adcDataBuffer.tempFet * 1000.0);
-	gDoubleBuffer.tempMcu = (int16_t)(adcDataBuffer.tempMcu * 1000.0);
-	gDoubleBuffer.charge = adcDataBuffer.chargeCounter;
-	gDoubleBuffer.energy = adcDataBuffer.energyCounter;
+	gMeasurementData_DoubleBuffer.vdda = (int32_t)(adcDataBuffer.vdda * 1000000.0);
+	gMeasurementData_DoubleBuffer.voltage = (int32_t)(adcDataBuffer.voltage * 1000000.0);
+	gMeasurementData_DoubleBuffer.current = (int32_t)(adcDataBuffer.current * 1000000.0);
+	gMeasurementData_DoubleBuffer.power = (int32_t)(adcDataBuffer.powerPrecise * 1000000.0);
+	gMeasurementData_DoubleBuffer.resistance = (uint32_t)adcDataBuffer.resistance;
+	gMeasurementData_DoubleBuffer.tempFet = (int32_t)(adcDataBuffer.tempFet * 1000.0);
+	gMeasurementData_DoubleBuffer.tempMcu = (int32_t)(adcDataBuffer.tempMcu * 1000.0);
+	gMeasurementData_DoubleBuffer.charge = adcDataBuffer.chargeCounter;
+	gMeasurementData_DoubleBuffer.energy = adcDataBuffer.energyCounter;
 }
 
 

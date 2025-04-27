@@ -10,6 +10,8 @@
 #include <Logger/Logger.h>
 #include <ModbusManager/Communication.h>
 #include <ModbusManager/MeasurementData/MeasurementData.h>
+#include <ModbusManager/LoadControl/LoadControl.h>
+#include <ModbusManager/Calibration/Calibration.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -23,6 +25,8 @@ static modbus_Exception_e ModbusManager_ReadCoilCallback(modbus_FunctionCode_e f
 static modbus_Exception_e ModbusManager_ReadDiscreteInputCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
 static modbus_Exception_e ModbusManager_ReadInputRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
 static modbus_Exception_e ModbusManager_ReadHoldingRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
+
+static modbus_Exception_e ModbusManager_WriteRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t registerValue);
 
 
 
@@ -51,7 +55,7 @@ static modbus_t gModbusInstance =
 	.pReadHoldingRegisterHandler = ModbusManager_ReadHoldingRegisterCallback,
 
 	.pWriteCoilHandler = NULL,
-	.pWriteRegisterHandler = NULL
+	.pWriteRegisterHandler = ModbusManager_WriteRegisterCallback
 };
 
 static bool gModbusRequestReady = false;
@@ -200,10 +204,15 @@ static modbus_Exception_e ModbusManager_ReadDiscreteInputCallback(modbus_Functio
 //
 static modbus_Exception_e ModbusManager_ReadInputRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer)
 {
-	UNUSED(functionCode);
-	UNUSED(registerAddress);
-	UNUSED(pRegisterBuffer);
-	return MODBUS_EXCEPTION_ILLEGALFUNCTION;
+	modbus_Exception_e ret;
+
+	ret = ModbusManager_MeasurementData_ReadInputRegisters(functionCode, registerAddress, pRegisterBuffer);
+	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)
+	{
+		return ret;
+	}
+
+	return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
 }
 
 //------------------------------------------------------------------------------
@@ -212,8 +221,34 @@ static modbus_Exception_e ModbusManager_ReadHoldingRegisterCallback(modbus_Funct
 {
 	modbus_Exception_e ret;
 
-	ModbusManager_MeasurementData_HandleDoubleBuffer(registerAddress);
-	ret = ModbusManager_Datapoint_ReadRegister(&gModbusManager_MeasurementData_Array, registerAddress, pRegisterBuffer);
+	ret = ModbusManager_LoadControl_ReadHoldingRegisters(functionCode, registerAddress, pRegisterBuffer);
+	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)
+	{
+		return ret;
+	}
+
+	ret = ModbusManager_Calibration_ReadHoldingRegisters(functionCode, registerAddress, pRegisterBuffer);
+	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)
+	{
+		return ret;
+	}
+
+	return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
+}
+
+//------------------------------------------------------------------------------
+//
+static modbus_Exception_e ModbusManager_WriteRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t registerValue)
+{
+	modbus_Exception_e ret;
+
+	ret = ModbusManager_LoadControl_WriteHoldingRegisters(functionCode, registerAddress, registerValue);
+	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)
+	{
+		return ret;
+	}
+
+	ret = ModbusManager_Calibration_WriteHoldingRegisters(functionCode, registerAddress, registerValue);
 	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)
 	{
 		return ret;

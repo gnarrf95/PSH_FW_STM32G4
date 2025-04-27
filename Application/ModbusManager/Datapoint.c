@@ -10,13 +10,13 @@
 
 
 
-static ModbusManager_Datapoint_t *ModbusManager_Datapoint_GetDatapoint(ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress);
+static const ModbusManager_Datapoint_t *ModbusManager_Datapoint_GetDatapoint(const ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress);
 
 
 
 //------------------------------------------------------------------------------
 //
-modbus_Exception_e ModbusManager_Datapoint_ReadRegister(ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress, uint16_t *pRegisterBuffer)
+modbus_Exception_e ModbusManager_Datapoint_ReadRegister(const ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress, uint16_t *pRegisterBuffer)
 {
 	if (pDatapointArray == NULL)
 	{
@@ -31,8 +31,16 @@ modbus_Exception_e ModbusManager_Datapoint_ReadRegister(ModbusManager_DatapointA
 		return MODBUS_EXCEPTION_SLAVEDEVICEFAILURE;
 	}
 
-	ModbusManager_Datapoint_t *pDatapoint = ModbusManager_Datapoint_GetDatapoint(pDatapointArray, registerAddress);
+	const ModbusManager_Datapoint_t *pDatapoint = ModbusManager_Datapoint_GetDatapoint(pDatapointArray, registerAddress);
 	if (pDatapoint == NULL)
+	{
+		return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
+	}
+	if (pDatapoint->access == ACCESS_NONE)
+	{
+		return MODBUS_EXCEPTION_SLAVEDEVICEFAILURE;
+	}
+	if(pDatapoint->access == ACCESS_WRITEONLY)
 	{
 		return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
 	}
@@ -40,6 +48,42 @@ modbus_Exception_e ModbusManager_Datapoint_ReadRegister(ModbusManager_DatapointA
 	uint8_t byteOffset = (pDatapoint->dataSizeBytes - 2) - ((registerAddress - pDatapoint->startAddress) * 2);
 
 	*pRegisterBuffer = ((uint16_t)pDatapoint->pData[byteOffset+1] << 8) | (uint16_t)pDatapoint->pData[byteOffset];
+
+	return MODBUS_EXCEPTION_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+//
+modbus_Exception_e ModbusManager_Datapoint_WriteRegister(const ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress, uint16_t registerValue)
+{
+	if (pDatapointArray == NULL)
+	{
+		return MODBUS_EXCEPTION_SLAVEDEVICEFAILURE;
+	}
+	if (pDatapointArray->pArray == NULL)
+	{
+		return MODBUS_EXCEPTION_SLAVEDEVICEFAILURE;
+	}
+
+	const ModbusManager_Datapoint_t *pDatapoint = ModbusManager_Datapoint_GetDatapoint(pDatapointArray, registerAddress);
+	if (pDatapoint == NULL)
+	{
+		return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
+	}
+	if (pDatapoint->access == ACCESS_NONE)
+	{
+		return MODBUS_EXCEPTION_SLAVEDEVICEFAILURE;
+	}
+	if(pDatapoint->access == ACCESS_READONLY)
+	{
+		return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
+	}
+
+	uint8_t byteOffset = (pDatapoint->dataSizeBytes - 2) - ((registerAddress - pDatapoint->startAddress) * 2);
+
+	pDatapoint->pData[byteOffset] = (uint8_t)(registerValue & 0x00FF);
+	pDatapoint->pData[byteOffset+1] = (uint8_t)((registerValue & 0xFF00) >> 8);
+
 	return MODBUS_EXCEPTION_SUCCESS;
 }
 
@@ -47,7 +91,7 @@ modbus_Exception_e ModbusManager_Datapoint_ReadRegister(ModbusManager_DatapointA
 
 //------------------------------------------------------------------------------
 //
-static ModbusManager_Datapoint_t *ModbusManager_Datapoint_GetDatapoint(ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress)
+static const ModbusManager_Datapoint_t *ModbusManager_Datapoint_GetDatapoint(const ModbusManager_DatapointArray_t *pDatapointArray, uint16_t registerAddress)
 {
 	if (pDatapointArray == NULL)
 	{

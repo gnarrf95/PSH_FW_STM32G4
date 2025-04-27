@@ -16,7 +16,7 @@ extern "C" {
 
 
 
-modbus_Exception_e ModbusManager_MeasurementData_ReadHoldingRegisters(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
+modbus_Exception_e ModbusManager_MeasurementData_ReadInputRegisters(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
 
 
 

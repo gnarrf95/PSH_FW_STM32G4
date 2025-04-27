@@ -14,6 +14,7 @@
 #include <tim.h>
 
 #include <string.h>
+#include <math.h>
 
 
 
@@ -144,6 +145,7 @@ bool AdcHandler_Handle(void)
 	float current;
 	float powerCalc;
 	float powerAccCalc;
+	float resistance;
 	float tempFetSense;
 	float tempMcuSample;
 
@@ -169,6 +171,7 @@ bool AdcHandler_Handle(void)
 	current = (currentAcc / (float)ADCHANDLER_ADC_AVERAGING) * (gVddaCal / (float)ADCHANDLER_ADC_RESOLUTION) * ADCHANDLER_CONVERSIONFACTOR_CURRENT;
 	powerCalc = voltage * current;
 	powerAccCalc = (powerAcc / (float)ADCHANDLER_ADC_AVERAGING) * (gVddaCal / (float)ADCHANDLER_ADC_RESOLUTION) * (gVddaCal / (float)ADCHANDLER_ADC_RESOLUTION) * (ADCHANDLER_CONVERSIONFACTOR_VOLTAGE * ADCHANDLER_CONVERSIONFACTOR_CURRENT);
+	resistance = fabs(voltage / current);
 	tempFetSense = (tempFetAcc / (float)ADCHANDLER_ADC_AVERAGING) * (gVddaCal / (float)ADCHANDLER_ADC_RESOLUTION);
 	tempMcuSample = tempMcuAcc / (float)ADCHANDLER_ADC_AVERAGING;
 
@@ -184,7 +187,7 @@ bool AdcHandler_Handle(void)
 	gAdcData.powerPrecise = powerAccCalc;
 	gAdcData.tempFet = AdcHandler_ConvertTempFet(tempFetSense);
 	gAdcData.tempMcu = AdcHandler_ConvertTempMcu(tempMcuSample, gVddaCal);
-
+	gAdcData.resistance = resistance;
 	gAdcData.chargeCounter += chargeCount;
 	gAdcData.energyCounter += energyCount;
 

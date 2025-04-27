@@ -26,6 +26,7 @@ typedef struct
 	float current;
 	float powerAverage;
 	float powerPrecise;
+	float resistance;
 	float tempFet;
 	float tempMcu;
 
