@@ -27,7 +27,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <Logger/Logger.h>
+#include <Timer/TimerMicro.h>
+#include <Adc/AdcHandler.h>
+#include <ModbusManager/Communication.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +52,22 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+SerialHandler_Instance_t gVcpHandler =
+{
+	.pUsart = &huart2,
 
+	.pBuffer = NULL,
+	.bufferSize = 0,
+
+	.triggerOnTimeout = false,
+	.timeoutBitsCount = 0,
+
+	.triggerOnStopBytes = false,
+	.pStopBytes = NULL,
+	.stopBytesSize = 0,
+
+	.pListenerCallback = NULL
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,13 +118,22 @@ int main(void)
   MX_ADC1_Init();
   MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
-
+  TimerMicro_Init(&htim2);
+  if (AdcHandler_Init() == ERROR)
+  {
+	  Error_Handler();
+  }
+  ModbusManager_Init(&gVcpHandler, 0x01);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  LOG_INFO("Core Start.");
+
   while (1)
   {
+	AdcHandler_Handle();
+	ModbusManager_Handle();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -160,7 +188,20 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+int _write(int, char *ptr, int len)
+{
+	for(uint32_t DataIdx = 0; DataIdx < len; DataIdx++)
+	{
+		ITM_SendChar(*ptr++);
+	}
 
+	return len;
+}
+
+uint32_t Logger_GetTimestamp(void)
+{
+	return __HAL_TIM_GET_COUNTER(&htim2);
+}
 /* USER CODE END 4 */
 
 /**
@@ -174,6 +215,8 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  HAL_Delay(250);
   }
   /* USER CODE END Error_Handler_Debug */
 }
@@ -191,6 +234,9 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+
+	Logger_LogMessageTrace(LOGGER_VERBOSITY_FATAL, (const char *)file, line, "assert_param() failed.");
+	Error_Handler();
+	/* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

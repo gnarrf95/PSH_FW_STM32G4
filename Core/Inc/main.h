@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <Serial/SerialHandler.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -46,7 +46,7 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+extern SerialHandler_Instance_t gVcpHandler;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -61,6 +61,10 @@ void Error_Handler(void);
 #define SENSE_I_GPIO_Port GPIOA
 #define SENSE_V_Pin GPIO_PIN_1
 #define SENSE_V_GPIO_Port GPIOA
+#define VCP_TX_Pin GPIO_PIN_2
+#define VCP_TX_GPIO_Port GPIOA
+#define VCP_RX_Pin GPIO_PIN_3
+#define VCP_RX_GPIO_Port GPIOA
 #define SET_I_Pin GPIO_PIN_4
 #define SET_I_GPIO_Port GPIOA
 #define LOAD_SHUTDOWN_Pin GPIO_PIN_7
