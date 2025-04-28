@@ -33,8 +33,8 @@ static struct
 	int32_t current;
 	int32_t power;
 	uint32_t resistance;
-	int16_t tempFet;
-	int16_t tempMcu;
+	int32_t tempFet;
+	int32_t tempMcu;
 	int64_t charge;
 	int64_t energy;
 } gMeasurementData_DoubleBuffer;
