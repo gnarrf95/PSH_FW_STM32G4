@@ -188,7 +188,7 @@ class ModbusComm:
 			float(voltageFactor) / 1000000.0,
 			float(voltageOffset) / 1000000.0,
 			float(currentFactor) / 1000000.0,
-			float(currentOffset) / 1000.0
+			float(currentOffset) / 1000000.0
 		)
 
     # --------------------------------------------------------------------------
