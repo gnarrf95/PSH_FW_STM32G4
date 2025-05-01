@@ -9,7 +9,7 @@
 #define MODBUSMANAGER_DATAPOINT_H_
 
 #include <stdint.h>
-#include <modbus.h>
+#include <ModbusEmbedded/modbus.h>
 
 #ifdef __cplusplus
 extern "C" {

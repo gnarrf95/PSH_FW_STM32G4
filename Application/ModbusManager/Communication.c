@@ -5,7 +5,7 @@
  *      Author: manue
  */
 
-#include <modbus.h>
+#include <ModbusEmbedded/modbus.h>
 #include <Timer/TimerMicro.h>
 #include <Logger/Logger.h>
 #include <ModbusManager/Communication.h>

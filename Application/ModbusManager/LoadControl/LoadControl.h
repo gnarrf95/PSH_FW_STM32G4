@@ -8,7 +8,7 @@
 #ifndef MODBUSMANAGER_LOADCONTROL_LOADCONTROL_H_
 #define MODBUSMANAGER_LOADCONTROL_LOADCONTROL_H_
 
-#include <modbus.h>
+#include <ModbusEmbedded/modbus.h>
 
 #ifdef __cplusplus
 extern "C" {
