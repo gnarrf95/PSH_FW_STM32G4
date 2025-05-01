@@ -6,45 +6,45 @@
  */
 
 #include <ModbusManager/LoadControl/LoadControl.h>
-#include <ModbusManager/Datapoint.h>
 #include <ModbusManager/Registers.h>
+#include <ModbusEmbedded/modbus_buffer.h>
 
 
 
 static ModbusManager_LoadControl_Buffer_t gLoadControl_DoubleBuffer;
 
-static const ModbusManager_Datapoint_t gDatapoints[] =
+static const modbus_Buffer_Datapoint_t gDatapoints[] =
 {
 	{
 		.startAddress = MODBUSMANAGER_LOADCONTROL_SETVOLTAGE,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gLoadControl_DoubleBuffer.setVoltage,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gLoadControl_DoubleBuffer.setVoltage,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_LOADCONTROL_SETCURRENT,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gLoadControl_DoubleBuffer.setCurrent,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gLoadControl_DoubleBuffer.setCurrent,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_LOADCONTROL_SETPOWER,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gLoadControl_DoubleBuffer.setPower,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gLoadControl_DoubleBuffer.setPower,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_LOADCONTROL_SETRESISTANCE,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gLoadControl_DoubleBuffer.setResistance,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gLoadControl_DoubleBuffer.setResistance,
 		.dataSizeBytes = 4
 	}
 };
 
-static const ModbusManager_DatapointArray_t gDatapointArray =
+static const modbus_Buffer_t gDatapointArray =
 {
 	.pArray = gDatapoints,
-	.arraySize = sizeof(gDatapoints) / sizeof(ModbusManager_Datapoint_t)
+	.arraySize = sizeof(gDatapoints) / sizeof(modbus_Buffer_Datapoint_t)
 };
 
 
@@ -74,7 +74,7 @@ modbus_Exception_e ModbusManager_LoadControl_ReadHoldingRegisters(modbus_Functio
 	}
 	else
 	{
-		return ModbusManager_Datapoint_ReadRegister(&gDatapointArray, registerAddress, pRegisterBuffer);
+		return modbus_Buffer_ReadRegister(&gDatapointArray, registerAddress, pRegisterBuffer);
 	}
 }
 

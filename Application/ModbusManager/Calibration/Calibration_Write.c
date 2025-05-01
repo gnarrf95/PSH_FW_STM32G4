@@ -6,46 +6,46 @@
  */
 
 #include <ModbusManager/Calibration/Calibration.h>
-#include <ModbusManager/Datapoint.h>
 #include <ModbusManager/Registers.h>
+#include <ModbusEmbedded/modbus_buffer.h>
 #include <Logger/Logger.h>
 
 
 
 static ModbusManager_Calibration_Buffer_t gCalibration_Buffer;
 
-static const ModbusManager_Datapoint_t gDatapoints[] =
+static const modbus_Buffer_Datapoint_t gDatapoints[] =
 {
 	{
 		.startAddress = MODBUSMANAGER_CALIBRATION_VOLTAGECAL_FACTOR,
-		.access = ACCESS_WRITEONLY,
-		.pData = (uint8_t *)&gCalibration_Buffer.voltageFactor,
+		.accessType = MODBUS_BUFFER_ACCESS_WRITEONLY,
+		.pDataBuffer = (uint8_t *)&gCalibration_Buffer.voltageFactor,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_CALIBRATION_VOLTAGECAL_OFFSET,
-		.access = ACCESS_WRITEONLY,
-		.pData = (uint8_t *)&gCalibration_Buffer.voltageOffset,
+		.accessType = MODBUS_BUFFER_ACCESS_WRITEONLY,
+		.pDataBuffer = (uint8_t *)&gCalibration_Buffer.voltageOffset,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_CALIBRATION_CURRENTCAL_FACTOR,
-		.access = ACCESS_WRITEONLY,
-		.pData = (uint8_t *)&gCalibration_Buffer.currentFactor,
+		.accessType = MODBUS_BUFFER_ACCESS_WRITEONLY,
+		.pDataBuffer = (uint8_t *)&gCalibration_Buffer.currentFactor,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_CALIBRATION_CURRENTCAL_OFFSET,
-		.access = ACCESS_WRITEONLY,
-		.pData = (uint8_t *)&gCalibration_Buffer.currentOffset,
+		.accessType = MODBUS_BUFFER_ACCESS_WRITEONLY,
+		.pDataBuffer = (uint8_t *)&gCalibration_Buffer.currentOffset,
 		.dataSizeBytes = 4
 	}
 };
 
-static const ModbusManager_DatapointArray_t gDatapointArray =
+static const modbus_Buffer_t gDatapointArray =
 {
 	.pArray = gDatapoints,
-	.arraySize = sizeof(gDatapoints) / sizeof(ModbusManager_Datapoint_t)
+	.arraySize = sizeof(gDatapoints) / sizeof(modbus_Buffer_Datapoint_t)
 };
 
 
@@ -64,7 +64,7 @@ modbus_Exception_e ModbusManager_Calibration_WriteHoldingRegisters(modbus_Functi
 	}
 	else
 	{
-		return ModbusManager_Datapoint_WriteRegister(&gDatapointArray, registerAddress, registerValue);
+		return modbus_Buffer_WriteRegister(&gDatapointArray, registerAddress, registerValue);
 	}
 }
 

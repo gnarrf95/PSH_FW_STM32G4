@@ -6,8 +6,8 @@
  */
 
 #include <ModbusManager/MeasurementData/MeasurementData.h>
-#include <ModbusManager/Datapoint.h>
 #include <ModbusManager/Registers.h>
+#include <ModbusEmbedded/modbus_buffer.h>
 #include <Timer/TimerMicro.h>
 #include <Adc/AdcHandler.h>
 
@@ -27,74 +27,74 @@ static struct
 	int64_t energy;
 } gMeasurementData_DoubleBuffer;
 
-static const ModbusManager_Datapoint_t gDatapoints[] =
+static const modbus_Buffer_Datapoint_t gDatapoints[] =
 {
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_TIMESTAMP,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.timestamp,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.timestamp,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_VDDA,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.vdda,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.vdda,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_VOLTAGE,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.voltage,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.voltage,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_CURRENT,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.current,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.current,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_POWER,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.power,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.power,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_RESISTANCE,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.resistance,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.resistance,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_TEMPFET,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.tempFet,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.tempFet,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_TEMPMCU,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.tempMcu,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.tempMcu,
 		.dataSizeBytes = 4
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_CHARGECOUNT,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.charge,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.charge,
 		.dataSizeBytes = 8
 	},
 	{
 		.startAddress = MODBUSMANAGER_MEASUREMENTDATA_ENERGYCOUNT,
-		.access = ACCESS_READONLY,
-		.pData = (uint8_t *)&gMeasurementData_DoubleBuffer.energy,
+		.accessType = MODBUS_BUFFER_ACCESS_READONLY,
+		.pDataBuffer = (uint8_t *)&gMeasurementData_DoubleBuffer.energy,
 		.dataSizeBytes = 8
 	}
 };
 
-static const ModbusManager_DatapointArray_t gDatapointArray =
+static const modbus_Buffer_t gDatapointArray =
 {
 	.pArray = gDatapoints,
-	.arraySize = sizeof(gDatapoints) / sizeof(ModbusManager_Datapoint_t)
+	.arraySize = sizeof(gDatapoints) / sizeof(modbus_Buffer_Datapoint_t)
 };
 
 
@@ -112,7 +112,7 @@ modbus_Exception_e ModbusManager_MeasurementData_ReadHoldingRegisters(modbus_Fun
 		ModbusManager_MeasurementData_FetchDoubleBuffer();
 	}
 
-	return ModbusManager_Datapoint_ReadRegister(&gDatapointArray, registerAddress, pRegisterBuffer);
+	return modbus_Buffer_ReadRegister(&gDatapointArray, registerAddress, pRegisterBuffer);
 }
 
 
