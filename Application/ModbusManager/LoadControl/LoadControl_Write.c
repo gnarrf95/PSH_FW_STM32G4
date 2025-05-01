@@ -7,6 +7,7 @@
 
 #include <ModbusManager/LoadControl/LoadControl.h>
 #include <ModbusManager/Datapoint.h>
+#include <ModbusManager/Registers.h>
 #include <Logger/Logger.h>
 
 

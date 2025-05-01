@@ -7,23 +7,11 @@
 
 #include <ModbusManager/MeasurementData/MeasurementData.h>
 #include <ModbusManager/Datapoint.h>
+#include <ModbusManager/Registers.h>
 #include <Timer/TimerMicro.h>
 #include <Adc/AdcHandler.h>
 
 
-
-#define MODBUSMANAGER_MEASUREMENTDATA_TIMESTAMP					0x0000
-#define MODBUSMANAGER_MEASUREMENTDATA_VDDA						0x0002
-#define MODBUSMANAGER_MEASUREMENTDATA_VOLTAGE					0x0004
-#define MODBUSMANAGER_MEASUREMENTDATA_CURRENT					0x0006
-#define MODBUSMANAGER_MEASUREMENTDATA_POWER						0x0008
-#define MODBUSMANAGER_MEASUREMENTDATA_RESISTANCE				0x000A
-#define MODBUSMANAGER_MEASUREMENTDATA_TEMPFET					0x000C
-#define MODBUSMANAGER_MEASUREMENTDATA_TEMPMCU					0x000E
-#define MODBUSMANAGER_MEASUREMENTDATA_CHARGECOUNT				0x0010
-#define MODBUSMANAGER_MEASUREMENTDATA_ENERGYCOUNT				0x0014
-
-#define MODBUSMANAGER_MEASUREMENTDATA_DOUBLEBUFFER_TRIGGER		MODBUSMANAGER_MEASUREMENTDATA_TIMESTAMP
 
 static struct
 {
@@ -117,7 +105,7 @@ static void ModbusManager_MeasurementData_FetchDoubleBuffer(void);
 
 //------------------------------------------------------------------------------
 //
-modbus_Exception_e ModbusManager_MeasurementData_ReadInputRegisters(modbus_FunctionCode_e /* functionCode */, uint16_t registerAddress, uint16_t *pRegisterBuffer)
+modbus_Exception_e ModbusManager_MeasurementData_ReadHoldingRegisters(modbus_FunctionCode_e /* functionCode */, uint16_t registerAddress, uint16_t *pRegisterBuffer)
 {
 	if (registerAddress == MODBUSMANAGER_MEASUREMENTDATA_DOUBLEBUFFER_TRIGGER)
 	{

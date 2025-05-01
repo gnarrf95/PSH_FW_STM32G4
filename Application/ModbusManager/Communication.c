@@ -21,11 +21,7 @@ static void ModbusManager_SerialReceiveCallback(uint32_t dataSize, SerialHandler
 
 static void ModbusManager_GenericFunction(modbus_Pdu_t *pPduRequest, modbus_Pdu_t *pPduResponse);
 
-static modbus_Exception_e ModbusManager_ReadCoilCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
-static modbus_Exception_e ModbusManager_ReadDiscreteInputCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
-static modbus_Exception_e ModbusManager_ReadInputRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
 static modbus_Exception_e ModbusManager_ReadHoldingRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer);
-
 static modbus_Exception_e ModbusManager_WriteRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t registerValue);
 
 
@@ -49,9 +45,9 @@ static modbus_t gModbusInstance =
 	.pGenericReadHandler = NULL,
 	.pGenericWriteHandler = NULL,
 
-	.pReadCoilHandler = ModbusManager_ReadCoilCallback,
-	.pReadDiscreteHandler = ModbusManager_ReadDiscreteInputCallback,
-	.pReadInputRegisterHandler = ModbusManager_ReadInputRegisterCallback,
+	.pReadCoilHandler = NULL,
+	.pReadDiscreteHandler = NULL,
+	.pReadInputRegisterHandler = NULL,
 	.pReadHoldingRegisterHandler = ModbusManager_ReadHoldingRegisterCallback,
 
 	.pWriteCoilHandler = NULL,
@@ -182,44 +178,15 @@ static void ModbusManager_GenericFunction(modbus_Pdu_t *pPduRequest, modbus_Pdu_
 
 //------------------------------------------------------------------------------
 //
-static modbus_Exception_e ModbusManager_ReadCoilCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer)
-{
-	UNUSED(functionCode);
-	UNUSED(registerAddress);
-	UNUSED(pRegisterBuffer);
-	return MODBUS_EXCEPTION_ILLEGALFUNCTION;
-}
-
-//------------------------------------------------------------------------------
-//
-static modbus_Exception_e ModbusManager_ReadDiscreteInputCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer)
-{
-	UNUSED(functionCode);
-	UNUSED(registerAddress);
-	UNUSED(pRegisterBuffer);
-	return MODBUS_EXCEPTION_ILLEGALFUNCTION;
-}
-
-//------------------------------------------------------------------------------
-//
-static modbus_Exception_e ModbusManager_ReadInputRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer)
+static modbus_Exception_e ModbusManager_ReadHoldingRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer)
 {
 	modbus_Exception_e ret;
 
-	ret = ModbusManager_MeasurementData_ReadInputRegisters(functionCode, registerAddress, pRegisterBuffer);
+	ret = ModbusManager_MeasurementData_ReadHoldingRegisters(functionCode, registerAddress, pRegisterBuffer);
 	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)
 	{
 		return ret;
 	}
-
-	return MODBUS_EXCEPTION_ILLEGALDATAADDRESS;
-}
-
-//------------------------------------------------------------------------------
-//
-static modbus_Exception_e ModbusManager_ReadHoldingRegisterCallback(modbus_FunctionCode_e functionCode, uint16_t registerAddress, uint16_t *pRegisterBuffer)
-{
-	modbus_Exception_e ret;
 
 	ret = ModbusManager_LoadControl_ReadHoldingRegisters(functionCode, registerAddress, pRegisterBuffer);
 	if (ret != MODBUS_EXCEPTION_ILLEGALDATAADDRESS)

@@ -7,6 +7,7 @@
 
 #include <ModbusManager/Calibration/Calibration.h>
 #include <ModbusManager/Datapoint.h>
+#include <ModbusManager/Registers.h>
 #include <Logger/Logger.h>
 
 
@@ -16,25 +17,25 @@ static ModbusManager_Calibration_Buffer_t gCalibration_Buffer;
 static const ModbusManager_Datapoint_t gDatapoints[] =
 {
 	{
-		.startAddress = MODBUSMANAGER_CALIBRATON_VOLTAGECAL_FACTOR,
+		.startAddress = MODBUSMANAGER_CALIBRATION_VOLTAGECAL_FACTOR,
 		.access = ACCESS_WRITEONLY,
 		.pData = (uint8_t *)&gCalibration_Buffer.voltageFactor,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_CALIBRATON_VOLTAGECAL_OFFSET,
+		.startAddress = MODBUSMANAGER_CALIBRATION_VOLTAGECAL_OFFSET,
 		.access = ACCESS_WRITEONLY,
 		.pData = (uint8_t *)&gCalibration_Buffer.voltageOffset,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_CALIBRATON_CURRENTCAL_FACTOR,
+		.startAddress = MODBUSMANAGER_CALIBRATION_CURRENTCAL_FACTOR,
 		.access = ACCESS_WRITEONLY,
 		.pData = (uint8_t *)&gCalibration_Buffer.currentFactor,
 		.dataSizeBytes = 4
 	},
 	{
-		.startAddress = MODBUSMANAGER_CALIBRATON_CURRENTCAL_OFFSET,
+		.startAddress = MODBUSMANAGER_CALIBRATION_CURRENTCAL_OFFSET,
 		.access = ACCESS_WRITEONLY,
 		.pData = (uint8_t *)&gCalibration_Buffer.currentOffset,
 		.dataSizeBytes = 4
