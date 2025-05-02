@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <Logger/Logger.h>
 #include <Timer/TimerMicro.h>
-#include <Adc/AdcHandler.h>
+#include <AnalogManager/AnalogManager.h>
 #include <ModbusManager/Communication.h>
 /* USER CODE END Includes */
 
@@ -119,7 +119,7 @@ int main(void)
   MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
   TimerMicro_Init(&htim2);
-  if (AdcHandler_Init() == ERROR)
+  if (AnalogManager_Init() == ERROR)
   {
 	  Error_Handler();
   }
@@ -132,7 +132,7 @@ int main(void)
 
   while (1)
   {
-	AdcHandler_Handle();
+	AnalogManager_Handle();
 	ModbusManager_Handle();
     /* USER CODE END WHILE */
 

@@ -21,6 +21,8 @@ extern "C" {
 
 typedef struct
 {
+	uint32_t timestamp;
+
 	float vdda;
 	float voltage;
 	float current;
@@ -37,9 +39,12 @@ typedef struct
 
 
 ErrorStatus AdcHandler_Init(void);
-float AdcHandler_GetVdda(void);
-
 bool AdcHandler_Handle(void);
+
+void AdcHandler_ResetChargeCounter(void);
+void AdcHandler_ResetEnergyCounter(void);
+
+float AdcHandler_GetVdda(void);
 bool AdcHandler_NewData(void);
 bool AdcHandler_GetData(AdcHandler_Data_t *pDataBuffer);
 

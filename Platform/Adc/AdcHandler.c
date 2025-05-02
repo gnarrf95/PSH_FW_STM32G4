@@ -67,6 +67,7 @@ static Calibration_t gCalibrationCurrent =
 
 static volatile uint16_t gAdcDmaBuffer[ADCHANDLER_ADC_BUFFER_LENGTH * 2];
 static volatile uint16_t *gpAdcDmaBufferReady;
+static volatile uint32_t gAdcDmaTimestamp;
 static volatile uint32_t gAdcDmaBufferOverrun;
 
 static TimerMicro_t gAdcTimer;
@@ -80,6 +81,9 @@ static volatile float gVddaCal;
 static AdcHandler_Data_t gAdcData;
 static bool gAdcDataReady;
 
+static bool gResetChargeCounter;
+static bool gResetEnergyCounter;
+
 
 
 //------------------------------------------------------------------------------
@@ -90,7 +94,11 @@ ErrorStatus AdcHandler_Init(void)
 	Calibration_Calculate(&gCalibrationCurrent);
 
 	gpAdcDmaBufferReady = NULL;
+	gAdcDmaTimestamp = 0;
 	gAdcDmaBufferOverrun = 0;
+
+	gResetChargeCounter = false;
+	gResetEnergyCounter = false;
 
 	gVddaCal = ADCHANDLER_ADC_VREF_NOMINAL;
 
@@ -112,13 +120,6 @@ ErrorStatus AdcHandler_Init(void)
 	}
 
 	return SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-//
-float AdcHandler_GetVdda(void)
-{
-	return gVddaCal;
 }
 
 //------------------------------------------------------------------------------
@@ -180,6 +181,7 @@ bool AdcHandler_Handle(void)
 
 
 
+	gAdcData.timestamp = gAdcDmaTimestamp;
 	gAdcData.vdda = gVddaCal;
 	gAdcData.voltage = voltage;
 	gAdcData.current = current;
@@ -188,8 +190,26 @@ bool AdcHandler_Handle(void)
 	gAdcData.tempFet = AdcHandler_ConvertTempFet(tempFetSense);
 	gAdcData.tempMcu = AdcHandler_ConvertTempMcu(tempMcuSample, gVddaCal);
 	gAdcData.resistance = resistance;
-	gAdcData.chargeCounter += chargeCount;
-	gAdcData.energyCounter += energyCount;
+
+	if (gResetChargeCounter)
+	{
+		gAdcData.chargeCounter = 0;
+		gResetChargeCounter = false;
+	}
+	else
+	{
+		gAdcData.chargeCounter += chargeCount;
+	}
+
+	if (gResetEnergyCounter)
+	{
+		gAdcData.energyCounter = 0;
+		gResetEnergyCounter = false;
+	}
+	else
+	{
+		gAdcData.energyCounter += energyCount;
+	}
 
 
 
@@ -198,6 +218,27 @@ bool AdcHandler_Handle(void)
 	gAdcDataReady = true;
 
 	return gAdcDataReady;
+}
+
+//------------------------------------------------------------------------------
+//
+void AdcHandler_ResetChargeCounter(void)
+{
+	gResetChargeCounter = true;
+}
+
+//------------------------------------------------------------------------------
+//
+void AdcHandler_ResetEnergyCounter(void)
+{
+	gResetEnergyCounter = true;
+}
+
+//------------------------------------------------------------------------------
+//
+float AdcHandler_GetVdda(void)
+{
+	return gVddaCal;
 }
 
 //------------------------------------------------------------------------------
@@ -245,6 +286,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc)
 
 	// First Half of Buffer
 	gpAdcDmaBufferReady = (uint16_t *)&gAdcDmaBuffer[0];
+	gAdcDmaTimestamp = gAdcTimer.timestamp;
 }
 
 //------------------------------------------------------------------------------
@@ -265,6 +307,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 	// Second Half of Buffer
 	gpAdcDmaBufferReady = (uint16_t *)&gAdcDmaBuffer[ADCHANDLER_ADC_BUFFER_LENGTH];
+	gAdcDmaTimestamp = gAdcTimer.timestamp;
 }
 
 

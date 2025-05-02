@@ -7,9 +7,10 @@
 
 #include <ModbusManager/MeasurementData/MeasurementData.h>
 #include <ModbusManager/Registers.h>
+#include <AnalogManager/AnalogManager.h>
 #include <ModbusEmbedded/modbus_buffer.h>
 #include <Timer/TimerMicro.h>
-#include <Adc/AdcHandler.h>
+
 
 
 
@@ -121,20 +122,18 @@ modbus_Exception_e ModbusManager_MeasurementData_ReadHoldingRegisters(modbus_Fun
 //
 static void ModbusManager_MeasurementData_FetchDoubleBuffer(void)
 {
-	gMeasurementData_DoubleBuffer.timestamp = TimerMicro_GetTimestamp();
+	const AnalogManager_MeasurementData_t *pMeasurementData = AnalogManager_GetMeasurementData();
 
-	AdcHandler_Data_t adcDataBuffer;
-	AdcHandler_GetData(&adcDataBuffer);
-
-	gMeasurementData_DoubleBuffer.vdda = (int32_t)(adcDataBuffer.vdda * 1000000.0);
-	gMeasurementData_DoubleBuffer.voltage = (int32_t)(adcDataBuffer.voltage * 1000000.0);
-	gMeasurementData_DoubleBuffer.current = (int32_t)(adcDataBuffer.current * 1000000.0);
-	gMeasurementData_DoubleBuffer.power = (int32_t)(adcDataBuffer.powerPrecise * 1000000.0);
-	gMeasurementData_DoubleBuffer.resistance = (uint32_t)adcDataBuffer.resistance;
-	gMeasurementData_DoubleBuffer.tempFet = (int32_t)(adcDataBuffer.tempFet * 1000.0);
-	gMeasurementData_DoubleBuffer.tempMcu = (int32_t)(adcDataBuffer.tempMcu * 1000.0);
-	gMeasurementData_DoubleBuffer.charge = adcDataBuffer.chargeCounter;
-	gMeasurementData_DoubleBuffer.energy = adcDataBuffer.energyCounter;
+	gMeasurementData_DoubleBuffer.timestamp = pMeasurementData->timestamp;
+	gMeasurementData_DoubleBuffer.vdda = (int32_t)(pMeasurementData->vdda.latest * 1000000.0);
+	gMeasurementData_DoubleBuffer.voltage = (int32_t)(pMeasurementData->voltage.latest * 1000000.0);
+	gMeasurementData_DoubleBuffer.current = (int32_t)(pMeasurementData->current.latest * 1000000.0);
+	gMeasurementData_DoubleBuffer.power = (int32_t)(pMeasurementData->power.latest * 1000000.0);
+	gMeasurementData_DoubleBuffer.resistance = (uint32_t)pMeasurementData->resistance.latest;
+	gMeasurementData_DoubleBuffer.tempFet = (int32_t)(pMeasurementData->tempFet.latest * 1000.0);
+	gMeasurementData_DoubleBuffer.tempMcu = (int32_t)(pMeasurementData->tempMcu.latest * 1000.0);
+	gMeasurementData_DoubleBuffer.charge = pMeasurementData->chargeCounter;
+	gMeasurementData_DoubleBuffer.energy = pMeasurementData->energyCounter;
 }
 
 
